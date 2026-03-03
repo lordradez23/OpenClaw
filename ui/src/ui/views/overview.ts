@@ -1,4 +1,4 @@
-import { html } from "lit";
+import { html, nothing } from "lit";
 import { t, i18n, type Locale } from "../../i18n/index.ts";
 import { formatRelativeTimestamp, formatDurationHuman } from "../format.ts";
 import type { GatewayHelloOk } from "../gateway.ts";
@@ -131,11 +131,16 @@ export function renderOverview(props: OverviewProps) {
   const currentLocale = i18n.getLocale();
 
   return html`
-    <section class="grid grid-cols-2">
-      <div class="card">
-        <div class="card-title">${t("overview.access.title")}</div>
-        <div class="card-sub">${t("overview.access.subtitle")}</div>
-        <div class="form-grid" style="margin-top: 16px;">
+    <div class="dashboard-header" style="margin-bottom: 48px; animation: rise 0.6s var(--ease-spring) backwards;">
+      <h1 class="glow-text--accent" style="font-size: 4rem; margin: 0; line-height: 1;">Overview</h1>
+      <p class="muted" style="font-size: 1.2rem; margin-top: 12px; opacity: 0.7; letter-spacing: -0.01em;">Gateway status, entry points, and a fast health read.</p>
+    </div>
+    <div class="dashboard-grid">
+      <div class="card card--main stagger-1">
+        <div class="card-header-accent">
+          <div class="card-title glow-text" style="font-size: 1.2rem;">${t("overview.access.title")}</div>
+        </div>
+        <div class="form-grid" style="margin-top: 24px;">
           <label class="field">
             <span>${t("overview.access.wsUrl")}</span>
             <input
@@ -203,22 +208,24 @@ export function renderOverview(props: OverviewProps) {
             </select>
           </label>
         </div>
-        <div class="row" style="margin-top: 14px;">
-          <button class="btn" @click=${() => props.onConnect()}>${t("common.connect")}</button>
+        <div class="row" style="margin-top: 24px; gap: 12px; display: flex; align-items: center;">
+          <button class="btn primary" @click=${() => props.onConnect()}>${t("common.connect")}</button>
           <button class="btn" @click=${() => props.onRefresh()}>${t("common.refresh")}</button>
-          <span class="muted">${
+          <span class="muted" style="font-size: 12px;">${
             isTrustedProxy ? t("overview.access.trustedProxy") : t("overview.access.connectHint")
           }</span>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-title">${t("overview.snapshot.title")}</div>
-        <div class="card-sub">${t("overview.snapshot.subtitle")}</div>
-        <div class="stat-grid" style="margin-top: 16px;">
+      <div class="card card--status stagger-2">
+        <div class="card-header-accent">
+          <div class="card-title glow-text" style="font-size: 1.2rem;">${t("overview.snapshot.title")}</div>
+        </div>
+        <div class="stat-grid" style="margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
           <div class="stat">
             <div class="stat-label">${t("overview.snapshot.status")}</div>
-            <div class="stat-value ${props.connected ? "ok" : "warn"}">
+            <div class="stat-value ${props.connected ? "ok" : "warn"}" style="display: flex; align-items: center; gap: 8px;">
+               <span class="statusDot ${props.connected ? "ok" : ""}" style="width: 10px; height: 10px;"></span>
               ${props.connected ? t("common.ok") : t("common.offline")}
             </div>
           </div>
@@ -232,46 +239,65 @@ export function renderOverview(props: OverviewProps) {
           </div>
           <div class="stat">
             <div class="stat-label">${t("overview.snapshot.lastChannelsRefresh")}</div>
-            <div class="stat-value">
+            <div class="stat-value" style="font-size: 16px;">
               ${props.lastChannelsRefresh ? formatRelativeTimestamp(props.lastChannelsRefresh) : t("common.na")}
             </div>
           </div>
         </div>
+
+        <div class="quick-actions" style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px;">
+           <div class="stat-label" style="margin-bottom: 12px;">Quick Actions</div>
+           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn--sm" @click=${() => props.onRefresh()}>
+                 Re-sync Gateway
+              </button>
+              <button class="btn btn--sm" @click=${() => window.dispatchEvent(new CustomEvent("openclaw-nav", { detail: { tab: "logs" } }))}>
+                 View Logs
+              </button>
+              <button class="btn btn--sm" @click=${() => window.dispatchEvent(new CustomEvent("openclaw-nav", { detail: { tab: "debug" } }))}>
+                 System Debug
+              </button>
+           </div>
+        </div>
+
         ${
           props.lastError
             ? html`<div class="callout danger" style="margin-top: 14px;">
-              <div>${props.lastError}</div>
+              <div style="font-weight: 500;">Connection Error</div>
+              <div style="margin-top: 4px; opacity: 0.9;">${props.lastError}</div>
               ${authHint ?? ""}
               ${insecureContextHint ?? ""}
             </div>`
-            : html`
-                <div class="callout" style="margin-top: 14px">
-                  ${t("overview.snapshot.channelsHint")}
-                </div>
-              `
+            : nothing
         }
       </div>
-    </section>
+    </div>
 
-    <section class="grid grid-cols-3" style="margin-top: 18px;">
-      <div class="card stat-card">
-        <div class="stat-label">${t("overview.stats.instances")}</div>
-        <div class="stat-value">${props.presenceCount}</div>
-        <div class="muted">${t("overview.stats.instancesHint")}</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-label">${t("overview.stats.sessions")}</div>
-        <div class="stat-value">${props.sessionsCount ?? t("common.na")}</div>
-        <div class="muted">${t("overview.stats.sessionsHint")}</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-label">${t("overview.stats.cron")}</div>
-        <div class="stat-value">
-          ${props.cronEnabled == null ? t("common.na") : props.cronEnabled ? t("common.enabled") : t("common.disabled")}
+    <div class="dashboard-stats" style="margin-top: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+      <div class="card stat-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+           <div class="stat-label">${t("overview.stats.instances")}</div>
+           <div class="stat-value" style="font-size: 32px; margin: 8px 0;">${props.presenceCount}</div>
         </div>
-        <div class="muted">${t("overview.stats.cronNext", { time: formatNextRun(props.cronNext) })}</div>
+        <div class="muted" style="font-size: 12px; border-top: 1px solid var(--border); padding-top: 8px;">${t("overview.stats.instancesHint")}</div>
       </div>
-    </section>
+      <div class="card stat-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+           <div class="stat-label">${t("overview.stats.sessions")}</div>
+           <div class="stat-value" style="font-size: 32px; margin: 8px 0;">${props.sessionsCount ?? t("common.na")}</div>
+        </div>
+        <div class="muted" style="font-size: 12px; border-top: 1px solid var(--border); padding-top: 8px;">${t("overview.stats.sessionsHint")}</div>
+      </div>
+      <div class="card stat-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+           <div class="stat-label">${t("overview.stats.cron")}</div>
+           <div class="stat-value" style="font-size: 32px; margin: 8px 0;">
+             ${props.cronEnabled == null ? t("common.na") : props.cronEnabled ? t("common.enabled") : t("common.disabled")}
+           </div>
+        </div>
+        <div class="muted" style="font-size: 12px; border-top: 1px solid var(--border); padding-top: 8px;">${t("overview.stats.cronNext", { time: formatNextRun(props.cronNext) })}</div>
+      </div>
+    </div>
 
     <section class="card" style="margin-top: 18px;">
       <div class="card-title">${t("overview.notes.title")}</div>

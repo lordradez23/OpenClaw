@@ -104,7 +104,10 @@ export const icons = {
     </svg>
   `,
   check: html`
-    <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg>
+    <svg viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="var(--accent-subtle)" stroke="var(--accent)" stroke-width="1.5" />
+      <path d="m9 12 2 2 4-4" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
   `,
   arrowDown: html`
     <svg viewBox="0 0 24 24">

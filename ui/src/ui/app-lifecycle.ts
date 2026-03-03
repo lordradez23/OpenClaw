@@ -36,6 +36,8 @@ type LifecycleHost = {
   logsEntries: unknown[];
   popStateHandler: () => void;
   topbarObserver: ResizeObserver | null;
+  setTab: (tab: Tab) => void;
+  navHandler?: (e: Event) => void;
 };
 
 export function handleConnected(host: LifecycleHost) {
@@ -45,6 +47,13 @@ export function handleConnected(host: LifecycleHost) {
   syncTabWithLocation(host as unknown as Parameters<typeof syncTabWithLocation>[0], true);
   syncThemeWithSettings(host as unknown as Parameters<typeof syncThemeWithSettings>[0]);
   attachThemeListener(host as unknown as Parameters<typeof attachThemeListener>[0]);
+  host.navHandler = (e: Event) => {
+    const detail = (e as CustomEvent).detail;
+    if (detail && typeof detail.tab === "string") {
+      host.setTab(detail.tab as Tab);
+    }
+  };
+  window.addEventListener("openclaw-nav", host.navHandler);
   window.addEventListener("popstate", host.popStateHandler);
   connectGateway(host as unknown as Parameters<typeof connectGateway>[0]);
   startNodesPolling(host as unknown as Parameters<typeof startNodesPolling>[0]);
@@ -61,6 +70,9 @@ export function handleFirstUpdated(host: LifecycleHost) {
 }
 
 export function handleDisconnected(host: LifecycleHost) {
+  if (host.navHandler) {
+    window.removeEventListener("openclaw-nav", host.navHandler);
+  }
   window.removeEventListener("popstate", host.popStateHandler);
   stopNodesPolling(host as unknown as Parameters<typeof stopNodesPolling>[0]);
   stopLogsPolling(host as unknown as Parameters<typeof stopLogsPolling>[0]);

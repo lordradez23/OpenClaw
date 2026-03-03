@@ -109,6 +109,16 @@ export function renderApp(state: AppViewState) {
 
   return html`
     <div class="shell ${isChat ? "shell--chat" : ""} ${chatFocus ? "shell--chat-focus" : ""} ${state.settings.navCollapsed ? "shell--nav-collapsed" : ""} ${state.onboarding ? "shell--onboarding" : ""}">
+      <div class="geo-background">
+        <div class="shape shape--tri shape-1"></div>
+        <div class="shape shape--hex shape-2"></div>
+        <div class="shape shape--tri shape-3"></div>
+        <div class="shape shape--hex" style="top: 20%; right: 15%; animation: drift-rev 35s infinite linear alternate; opacity: 0.1;"></div>
+        <div class="shape shape--tri" style="top: 40%; left: 40%; animation: drift 28s infinite linear alternate-reverse; opacity: 0.1; scale: 0.8;"></div>
+        <div class="shape shape-line line-1"></div>
+        <div class="shape shape-line line-2"></div>
+        <div class="shape shape-line" style="top: 50%; left: -20%; transform: rotate(-15deg); animation: drift-line 30s infinite linear reverse; opacity: 0.1;"></div>
+      </div>
       <header class="topbar">
         <div class="topbar-left">
           <button
@@ -190,8 +200,8 @@ export function renderApp(state: AppViewState) {
       <main class="content ${isChat ? "content--chat" : ""}">
         <section class="content-header">
           <div>
-            ${state.tab === "usage" ? nothing : html`<div class="page-title">${titleForTab(state.tab)}</div>`}
-            ${state.tab === "usage" ? nothing : html`<div class="page-sub">${subtitleForTab(state.tab)}</div>`}
+            ${state.tab === "usage" || state.tab === "overview" ? nothing : html`<div class="page-title">${titleForTab(state.tab)}</div>`}
+            ${state.tab === "usage" || state.tab === "overview" ? nothing : html`<div class="page-sub">${subtitleForTab(state.tab)}</div>`}
           </div>
           <div class="page-meta">
             ${state.lastError ? html`<div class="pill danger">${state.lastError}</div>` : nothing}
