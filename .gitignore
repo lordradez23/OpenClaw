@@ -3,7 +3,6 @@ node_modules
 .env
 docker-compose.extra.yml
 dist
-pnpm-lock.yaml
 bun.lock
 bun.lockb
 coverage
@@ -94,4 +93,3 @@ vector_db.lancedb/
 .agent/*.json
 !.agent/workflows/
 /local/
-package-lock.json
